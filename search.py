@@ -74,6 +74,7 @@ def tinyMazeSearch(problem):
 
 def depthFirstSearch(problem: SearchProblem):
     """
+
     Search the deepest nodes in the search tree first.
 
     Your search algorithm needs to return a list of actions that reaches the
@@ -82,11 +83,47 @@ def depthFirstSearch(problem: SearchProblem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
+
+    # # OUTPUT: Start State: (5, 5)
+    # print("Start State:", problem.getStartState())
+
+    # # OUTPUT: Is the start a goal? False
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+
+    # # OUTPUT: Start's successors: [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+
+
+    # DFS uses a stack; LIFO
+    frontier_stack = util.Stack()
+    explored_set = set()
+
+    # Initialize by adding start state to Frontier Stack
+    frontier_stack.push((problem.getStartState(), []))
+
+    # Keep popping from stack till empty
+    while not frontier_stack.isEmpty():
+        # Pop the first element (last in on stack)
+        temp_tuple = frontier_stack.pop()
+        current_state = temp_tuple[0]
+        actions = temp_tuple[1]
+
+        # Check if we've already visited this state
+        if current_state in explored_set:
+            continue
+        # Mark explored state
+        explored_set.add(current_state)
+
+        # Check if the state which was POPPED is the goal state;
+        if problem.isGoalState(current_state):
+            return actions
+
+        # Else, explore successive states and add to stack
+        for next_state, next_direction, _ in problem.getSuccessors(current_state):
+            if next_state not in explored_set:
+                frontier_stack.push((next_state, actions + [next_direction]))
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem: SearchProblem):
