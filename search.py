@@ -163,7 +163,35 @@ def breadthFirstSearch(problem: SearchProblem):
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
+    
+    frontier_pq = util.PriorityQueue()
+    best_cost = {}
+
+    start = problem.getStartState()
+    frontier_pq.push((start, [], 0), 0)  # (state, actions, cost_so_far), priority=g(n)
+
+    while not frontier_pq.isEmpty():
+        current_state, actions, cost_so_far = frontier_pq.pop()
+
+        # If we've already found a cheaper way to this state, skip this one
+        if current_state in best_cost and cost_so_far > best_cost[current_state]:
+            continue
+        best_cost[current_state] = cost_so_far
+
+        # Check for goal state only when we pop from frontier
+        if problem.isGoalState(current_state):
+            return actions
+
+        for next_state, next_action, stepCost in problem.getSuccessors(current_state):
+            new_cost = cost_so_far + stepCost
+
+            # Push if better than any we've seen for next_state
+            if next_state not in best_cost or new_cost < best_cost[next_state]:
+                frontier_pq.push(
+                    (next_state, actions + [next_action], new_cost),
+                    new_cost
+                )
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -171,11 +199,49 @@ def nullHeuristic(state, problem=None):
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
+
+    # This keeps h(n) == 0
     return 0
 
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+     # Order priority queue by lowest cost; explore these nodes first
+
+    #  PQ order contingent on both g(n) and h(n)
+    frontier_pq = util.PriorityQueue()
+
+    # track the running lowest cost to get to each state
+    best_cost = {}
+    start = problem.getStartState()
+
+    # call the heuristic function
+    frontier_pq.push((start, [], 0), heuristic(start, problem))
+
+    while not frontier_pq.isEmpty():
+        # first pop the node w/ the smallest overall cost
+        current_state, actions, cost_so_far = frontier_pq.pop()
+        if current_state in best_cost and cost_so_far > best_cost[current_state]:
+            continue
+
+        # iterative update of best cost per state
+        best_cost[current_state] = cost_so_far
+
+        if problem.isGoalState(current_state):
+            return actions
+
+        for next_state, next_direction, stepCost in problem.getSuccessors(current_state):
+            # compute the new g(n)
+            new_cost = cost_so_far + stepCost
+
+            # f(n) = g(n) + h(n)
+            priority = new_cost + heuristic(next_state, problem)
+
+            # only considered if it improves current best known cost
+            if next_state not in best_cost or new_cost < best_cost[next_state]:
+                frontier_pq.push(
+                    (next_state, actions + [next_direction], new_cost),
+                    priority
+                )
     util.raiseNotDefined()
 
 
